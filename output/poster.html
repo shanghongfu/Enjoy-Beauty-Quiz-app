@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; }
+  .poster {
+    width: 900px;
+    background: #FFF7FA;
+    padding: 48px 52px 40px;
+    color: #3A2430;
+  }
+  .head { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+  .brand { font-size:26px; font-weight:800; color:#E0527F; letter-spacing:1px; }
+  .brand span { color:#3A2430; }
+  .tagline { font-size:15px; color:#9A6B7E; margin-bottom:26px; }
+  .hero {
+    background:#E0527F; border-radius:20px; padding:34px 36px; color:#fff; margin-bottom:30px;
+    position:relative; overflow:hidden;
+  }
+  .hero::after {
+    content:""; position:absolute; right:-40px; top:-40px; width:180px; height:180px;
+    border-radius:50%; background:rgba(255,255,255,0.10);
+  }
+  .hero::before {
+    content:""; position:absolute; right:30px; bottom:-70px; width:150px; height:150px;
+    border-radius:50%; background:rgba(255,255,255,0.08);
+  }
+  .hero h1 { font-size:38px; font-weight:800; line-height:1.35; margin-bottom:12px; }
+  .hero p { font-size:17px; opacity:.95; line-height:1.7; max-width:640px; }
+  .hero .badges { margin-top:20px; display:flex; gap:10px; flex-wrap:wrap; position:relative; z-index:2; }
+  .badge {
+    background:rgba(255,255,255,0.18); border:1px solid rgba(255,255,255,0.4);
+    padding:6px 14px; border-radius:999px; font-size:14px;
+  }
+  .section { margin-bottom:30px; }
+  .sec-title {
+    display:flex; align-items:center; gap:10px; font-size:22px; font-weight:800; color:#3A2430;
+    margin-bottom:18px;
+  }
+  .sec-title .dot { width:10px; height:10px; border-radius:50%; background:#E0527F; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .card {
+    background:#fff; border:1px solid #F3D9E2; border-radius:16px; padding:20px 22px;
+  }
+  .card .icon { font-size:26px; margin-bottom:10px; }
+  .card .name { font-size:18px; font-weight:700; margin-bottom:6px; }
+  .card .desc { font-size:14px; color:#7A5A68; line-height:1.65; }
+  .value-band {
+    background:#3A2430; border-radius:20px; padding:30px 34px; color:#fff; margin-bottom:30px;
+  }
+  .value-band .vb-title { font-size:20px; font-weight:800; margin-bottom:16px; }
+  .value-list { display:grid; grid-template-columns:1fr 1fr; gap:14px 24px; }
+  .value-item { display:flex; gap:10px; font-size:15px; line-height:1.6; }
+  .value-item .check { color:#7FE0B8; font-weight:800; flex-shrink:0; }
+  .foot {
+    display:flex; justify-content:space-between; align-items:flex-end; gap:20px;
+    background:#fff; border:1px solid #F3D9E2; border-radius:16px; padding:20px 24px;
+  }
+  .foot .ft-l { }
+  .foot .ft-title { font-size:16px; font-weight:700; margin-bottom:6px; }
+  .foot .ft-desc { font-size:13px; color:#7A5A68; line-height:1.6; }
+  .foot .cta {
+    background:#E0527F; color:#fff; font-size:16px; font-weight:700;
+    padding:12px 26px; border-radius:999px; white-space:nowrap;
+  }
+</style>
+</head>
+<body>
+  <div class="poster">
+    <div class="head">
+      <div class="brand">Enjoy Beauty <span>美业考试刷题系统</span></div>
+      <div style="font-size:14px;color:#9A6B7E;">云端题库 · 多语言 · 即开即用</div>
+    </div>
+    <div class="tagline">给美业机构 / 培训学校的一站式学员刷题解决方案</div>
+
+    <div class="hero">
+      <h1>让每个学员<br>都有随身题库</h1>
+      <p>无需下载安装，打开链接即可刷题。机构一次建题库，学员全球任意设备随时随地练习，老师后台一键管理。</p>
+      <div class="badges">
+        <span class="badge">📱 手机 / 电脑都能用</span>
+        <span class="badge">🌍 中 / 英 / 西 / 越南语</span>
+        <span class="badge">☁️ 数据云端同步</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sec-title"><span class="dot"></span>核心功能</div>
+      <div class="grid">
+        <div class="card">
+          <div class="icon">📚</div>
+          <div class="name">多题库管理</div>
+          <div class="desc">按科目 / 章节 / 考试分门别类建题库，支持单选、多选、判断题，Word 题库一次批量导入。</div>
+        </div>
+        <div class="card">
+          <div class="icon">✍️</div>
+          <div class="name">三种练习模式</div>
+          <div class="desc">顺序练习、随机抽题、模拟考试，做完立即判分，答案解析即时展示。</div>
+        </div>
+        <div class="card">
+          <div class="icon">🗂️</div>
+          <div class="name">智能错题本</div>
+          <div class="desc">错题自动收集，随时重刷巩固，针对性补强薄弱环节。</div>
+        </div>
+        <div class="card">
+          <div class="icon">📊</div>
+          <div class="name">学员数据统计</div>
+          <div class="desc">每题答对率、学员正确率、已答数量一目了然，掌握班级整体水平。</div>
+        </div>
+        <div class="card">
+          <div class="icon">👥</div>
+          <div class="name">学员账号管理</div>
+          <div class="desc">一键批量创建学员，分配题库权限，可设有效期，到期自动失效。</div>
+        </div>
+        <div class="card">
+          <div class="icon">🌐</div>
+          <div class="name">多语言界面</div>
+          <div class="desc">中文 / English / Español / Tiếng Việt 自由切换，服务国际学员。</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="value-band">
+      <div class="vb-title">对机构的价值</div>
+      <div class="value-list">
+        <div class="value-item"><span class="check">✓</span><span>题库一次建设，学员永久复用，零印刷成本</span></div>
+        <div class="value-item"><span class="check">✓</span><span>后台统一管学员，账号即开即用，按需开通</span></div>
+        <div class="value-item"><span class="check">✓</span><span>学员练习数据实时可见，效果可量化</span></div>
+        <div class="value-item"><span class="check">✓</span><span>支持多语种，适合面向国际学员的机构</span></div>
+      </div>
+    </div>
+
+    <div class="foot">
+      <div class="ft-l">
+        <div class="ft-title">想详细了解？</div>
+        <div class="ft-desc">功能演示 · 报价方案 · 私有题库录入<br>联系我，5 分钟看懂怎么用</div>
+      </div>
+      <div class="cta">联系我了解详情 →</div>
+    </div>
+  </div>
+</body>
+</html>

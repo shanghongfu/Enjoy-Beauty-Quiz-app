@@ -1,0 +1,52 @@
+1. What is the capital of France?
+A. London
+B. Berlin
+C. Paris
+D. Madrid
+Answer: C
+Explanation: Paris has been the capital of France since the 10th century.
+
+2. Which of the following are programming languages?
+A. Python
+B. HTML
+C. JavaScript
+D. CSS
+Answer: A,C
+Explanation: HTML and CSS are markup/styling languages, not programming languages.
+
+3. The Earth is flat.
+Answer: False
+Explanation: The Earth is approximately an oblate spheroid.
+
+4. Who wrote "Romeo and Juliet"?
+A. Charles Dickens
+B. William Shakespeare
+C. Mark Twain
+D. Jane Austen
+Answer: B
+
+5. Which planet is known as the Red Planet?
+A. Venus
+B. Mars
+C. Jupiter
+D. Saturn
+Answer: B
+Explanation: Mars appears red due to iron oxide (rust) on its surface.
+
+6. Which of the following are primary colors in the additive color model?
+A. Red
+B. Green
+C. Blue
+D. Yellow
+Answer: A,B,C
+
+7. The Great Wall of China is visible from space with the naked eye.
+Answer: False
+Explanation: This is a popular myth. The wall is not easily visible from space.
+
+8. What does HTTP stand for?
+A. HyperText Transfer Protocol
+B. High Transfer Text Protocol
+C. HyperText Transport Process
+D. HyperText Transfer Process
+Answer: A
