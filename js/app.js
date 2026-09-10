@@ -1740,11 +1740,11 @@ async function importWordFile(file) {
     }
     // Detect language from filename suffix: e.g. nic-en.docx, nic-zh.docx
     const fn = file.name.toLowerCase().replace(/\.(docx?|doc)$/i, '');
-    const langMatch = fn.match(/[-_](en|es|vi|zh|cn|spa|vie|eng)$/i);
+    const langMatch = fn.match(/[-_](en|es|vi|zh|cn|spa|vie|eng|ko|kor|korean)$/i);
     let fileLang = null;
     if (langMatch) {
       const k = langMatch[1].toLowerCase();
-      const map = { en: 'en', eng: 'en', es: 'es', spa: 'es', vi: 'vi', vie: 'vi', zh: 'zh', cn: 'zh' };
+      const map = { en: 'en', eng: 'en', es: 'es', spa: 'es', vi: 'vi', vie: 'vi', zh: 'zh', cn: 'zh', ko: 'ko', kor: 'ko', korean: 'ko' };
       fileLang = map[k] || null;
     }
     if (!fileLang) fileLang = (window.i18n && window.i18n.currentLang) || 'en';

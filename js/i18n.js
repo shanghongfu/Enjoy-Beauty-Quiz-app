@@ -1,6 +1,6 @@
 /* ================================================
  * i18n.js — Internationalisation for Enjoy Beauty
- * Supports: English (en), Español (es), Tiếng Việt (vi), 中文 (zh)
+ * Supports: English (en), Español (es), Tiếng Việt (vi), 中文 (zh), 한국어 (ko)
  * Usage:
  *   i18n.t('key')                  → returns translated string
  *   i18n.t('greeting', {name:'X'}) → returns with placeholder substitution
@@ -1020,12 +1020,277 @@ const I18N_DICT = {
     'install.ios.step3': '获得完整的 App 体验',
     'install.ios.gotIt': '知道了',
     'install.ios.later': '稍后再说'
+  },
+
+  ko: {
+    // Brand
+    'app.name': 'Enjoy Beauty',
+    'app.tagline': '뷰티 교육, 언제든',
+
+    // Splash + Login
+    'splash.tagline': '뷰티 교육, 언제든',
+    'login.title': 'Enjoy Beauty',
+    'login.tagline': '뷰티 교육, 언제든',
+    'login.username': '아이디',
+    'login.password': '비밀번호',
+    'login.signin': '로그인',
+    'login.error.empty': '아이디와 비밀번호를 입력해 주세요',
+    'login.error.wrong': '아이디 또는 비밀번호가 올바르지 않거나, 비활성화된 계정입니다',
+    'login.error.expired': '계정이 만료되었습니다. 관리자에게 문의해 주세요.',
+    'login.language': '언어',
+
+    // Home
+    'home.greeting.hi': '안녕하세요',
+    'home.greeting.sub.admin': '학생과 문제 은행을 관리하세요',
+    'home.greeting.sub.student': '새로운 것을 배울 준비가 되셨나요?',
+    'home.banner.tag': '매일 퀴즈',
+    'home.banner.title': "오늘의 도전",
+    'home.banner.sub': '랜덤 문제 10개 · 5분',
+    'home.banner.cta': '시작하기 →',
+    'home.stat.streak': '연속 일수',
+    'home.stat.mastered': '마스터',
+    'home.stat.accuracy': '정답률',
+    'home.section.continue': '학습 계속하기',
+    'home.section.all': '전체 →',
+    'home.section.practice': '연습 모드',
+    'home.section.libraries': '내 문제 은행',
+    'home.section.manage': '관리 →',
+    'home.mode.sequential': '순서대로',
+    'home.mode.random': '랜덤',
+    'home.mode.exam': '시험 모드',
+    'home.mode.wrong': '오답 복습',
+    'home.empty.libraries': '아직 문제 은행이 없습니다. 관리자에게 추가해 달라고 요청하세요.',
+
+    // Library
+    'library.title': '문제 은행',
+    'library.search': '문제 은행 검색...',
+    'library.filter.all': '전체',
+    'library.filter.recent': '최근',
+    'library.filter.large': '문제 많은 순',
+    'library.add': '문제 은행 추가',
+    'library.empty': '검색 결과가 없습니다.',
+
+    // Practice
+    'practice.title': '연습',
+    'practice.setup.hero.emoji': '🎯',
+    'practice.setup.hero.title': '도전을 선택하세요',
+    'practice.setup.hero.sub': '문제 은행과 모드를 선택해 시작하세요',
+    'practice.type.single': '객관식(1개)',
+    'practice.type.multiple': '객관식(복수)',
+    'practice.type.judge': '참 / 거짓',
+    'practice.submit': '답안 제출',
+    'practice.next': '다음 →',
+    'practice.explanation.title': '💡 해설',
+    'practice.result.title': '잘하셨어요!',
+    'practice.result.correct': '정답',
+    'practice.result.wrong': '오답',
+    'practice.result.time': '시간',
+    'practice.result.retry': '다시하기',
+    'practice.result.back': '홈으로 돌아가기',
+
+    // Profile / Me
+    'me.bio.admin': '관리자',
+    'me.bio.student': '학생',
+    'me.stats.questions': '문제',
+    'me.stats.answered': '푼 문제',
+    'me.stats.accuracy': '정답률',
+    'me.stats.streak': '연속',
+    'me.menu.wrong': '오답 노트',
+    'me.menu.wrong.sub': '{n}개 저장됨',
+    'me.menu.stats': '통계',
+    'me.menu.stats.sub': '내 진행 상황 보기',
+    'me.menu.manage': '문제 은행 관리',
+    'me.menu.manage.sub': '추가 / 수정 / 가져오기',
+    'me.menu.export': '모두 내보내기',
+    'me.menu.export.sub': 'JSON 파일로 백업',
+    'me.menu.import': '데이터 가져오기',
+    'me.menu.import.sub': 'JSON / Word 파일에서',
+    'me.menu.reset': '모든 데이터 삭제',
+    'me.menu.reset.sub': '전체 삭제',
+    'me.menu.password': '비밀번호 변경',
+    'me.menu.password.sub': '로그인 비밀번호 업데이트',
+    'me.menu.logout': '로그아웃',
+    'me.menu.logout.sub': '이 계정에서 로그아웃',
+    'me.menu.language': '언어',
+    'me.menu.language.sub': 'English / Español / Tiếng Việt / 中文 / 한국어',
+    'me.app.version': 'Enjoy Beauty v1.0',
+    'me.app.tagline': '학습자를 위해 만들었어요 📚',
+
+    // Wrong
+    'wrong.title': '오답 노트',
+    'wrong.clear': '지우기',
+    'wrong.empty': '저장된 오답이 없습니다. 계속 노력해 주세요!',
+
+    // Stats
+    'stats.title': '통계',
+    'stats.overall.acc': '전체 정답률',
+    'stats.total.ans': '총 푼 문제',
+    'stats.total.cor': '총 정답',
+    'stats.total.wrong': '저장된 오답',
+    'stats.total.lib': '문제 은행',
+    'stats.perf': '문제 은행별 성과',
+    'stats.reset': '통계 초기화',
+
+    // Manage
+    'manage.title': '관리',
+    'manage.newlib': '새 문제 은행',
+    'manage.newlib.sub': '문제 은행 만들기',
+    'manage.addq': '문제 추가',
+    'manage.addq.sub': '객관식 또는 주관식',
+    'manage.importWord': 'Word 가져오기',
+    'manage.importWord.sub': '.docx / .doc 파일',
+    'manage.importJson': 'JSON 가져오기',
+    'manage.importJson.sub': '일괄 가져오기',
+    'manage.sample': '샘플 데이터',
+    'manage.sample.sub': '예제 퀴즈 불러오기',
+    'manage.export': '모두 내보내기',
+    'manage.export.sub': '파일로 백업',
+    'manage.yourlibs': '내 문제 은행',
+
+    // Students
+    'students.title': '학생',
+    'students.add': '학생 추가',
+    'students.search': '학생 검색...',
+    'students.filter.all': '전체',
+    'students.filter.enabled': '활성',
+    'students.filter.disabled': '비활성',
+    'students.empty': '아직 학생이 없습니다. +를 눌러 추가하세요.',
+    'students.status.active': '활성',
+    'students.status.disabled': '비활성',
+    'students.expiry.expires': '{date} 만료',
+    'students.expiry.expired': '{date} 만료됨',
+    'students.detail.edit': '수정',
+    'students.detail.libraries': '할당된 문제 은행',
+    'students.detail.none': '할당된 문제 은행 없음',
+    'students.detail.extend': '연장 +30일',
+    'students.detail.disable': '비활성화',
+    'students.detail.enable': '활성화',
+    'students.detail.delete': '삭제',
+    'students.detail.confirmDelete': '{name}을(를) 영구적으로 삭제할까요? 되돌릴 수 없습니다.',
+    'students.detail.confirmDisable': '{name}을(를) {action}하시겠습니까?',
+    'students.detail.extended': '{date}까지 연장됨',
+
+    // Modals
+    'modal.library.new': '새 문제 은행',
+    'modal.library.edit': '문제 은행 편집',
+    'modal.library.name': '문제 은행 이름 *',
+    'modal.library.name.ph': '예: 피부 관리 이론',
+    'modal.library.desc': '설명',
+    'modal.library.desc.ph': '간단한 소개',
+    'modal.library.icon': '아이콘 (이모지)',
+    'modal.library.color': '색상',
+    'modal.library.examDuration': '시험 시간 (분)',
+    'modal.library.examDuration.ph': '예: 60 — 비우면 비활성화',
+    'modal.library.examDuration.hint': '시험 모드에서만 사용됩니다. 비우면 제한 없음.',
+    'modal.library.examQCount': '시험 문제 수',
+    'modal.library.examQCount.hint': '시험당 문제 수 (기본 50)',
+    'modal.library.examPassRate': '합격률 (%)',
+    'modal.library.examPassRate.hint': '기본 70%',
+    'modal.library.save': '저장',
+    'modal.library.cancel': '취소',
+
+    'modal.question.add': '문제 추가',
+    'modal.question.edit': '문제 편집',
+    'modal.question.library': '문제 은행 *',
+    'modal.question.type': '유형',
+    'modal.question.stem': '문제 *',
+    'modal.question.stem.ph': '문제를 입력하세요',
+    'modal.question.options': '보기 (정답을 체크하세요)',
+    'modal.question.exp': '해설 (선택)',
+    'modal.question.exp.ph': '왜 정답인가요?',
+    'modal.question.save': '저장',
+
+    'modal.import.title': 'JSON 가져오기',
+    'modal.import.format': '형식: {fmt}',
+    'modal.import.ph': '여기에 JSON을 붙여넣으세요...',
+    'modal.import.go': '가져오기',
+
+    'modal.student.new': '학생 추가',
+    'modal.student.edit': '학생 편집',
+    'modal.student.username': '아이디 *',
+    'modal.student.username.ph': '예: alice',
+    'modal.student.name': '표시 이름',
+    'modal.student.name.ph': '예: Alice Wang',
+    'modal.student.password': '비밀번호',
+    'modal.student.password.ph': '초기 / 새 비밀번호',
+    'modal.student.password.hint': '(비워두면 현재 유지)',
+    'modal.student.avatar': '아바타 (이모지)',
+    'modal.student.expires': '만료일',
+    'modal.student.expires.hint': '이 날짜 이후 학생은 로그인할 수 없습니다.',
+    'modal.student.libs': '문제 은행 할당',
+    'modal.student.libs.empty': '사용 가능한 문제 은행이 없습니다. 먼저 관리에서 만드세요.',
+    'modal.student.status': '상태',
+    'modal.student.enabled': '활성',
+    'modal.student.disabled': '비활성',
+    'modal.student.save': '저장',
+    'modal.student.created': '학생이 생성되었습니다',
+    'modal.student.updated': '학생 정보가 수정되었습니다',
+    'modal.student.err.username': '아이디가 필요합니다',
+    'modal.student.err.password': '비밀번호는 4자 이상이어야 합니다',
+    'modal.student.err.passwordReq': '비밀번호가 필요합니다',
+    'modal.student.err.passwordReset': '프로필이 저장되었지만, 비밀번호 재설정은 Edge Function 배포가 필요합니다',
+
+    'modal.password.title': '비밀번호 변경',
+    'modal.password.new': '새 비밀번호',
+    'modal.password.new.ph': '최소 4자',
+    'modal.password.confirm': '새 비밀번호 확인',
+    'modal.password.confirm.ph': '비밀번호 다시 입력',
+    'modal.password.hint': '저장 후 다음 로그인부터 새 비밀번호를 사용하세요.',
+    'modal.password.err.empty': '새 비밀번호를 입력해 주세요',
+    'modal.password.err.short': '새 비밀번호는 최소 4자 이상이어야 합니다',
+    'modal.password.err.match': '새 비밀번호가 일치하지 않습니다',
+    'modal.password.err.fail': '업데이트 실패 (연결 확인)',
+    'modal.password.done': '비밀번호가 변경되었습니다',
+
+    // Toasts
+    'toast.enabled': '활성화됨',
+    'toast.disabled': '비활성화됨',
+    'toast.deleted': '삭제됨',
+    'toast.loginRequired': '접근 거부',
+    'toast.passwordOnlyAdmin': '비밀번호는 관리자만 변경할 수 있습니다',
+    'toast.loadingLang': '새 언어로 문제를 불러오는 중…',
+    'toast.imported': '가져옴',
+    'modal.question.language': '문제 언어',
+
+    // Common buttons
+    'btn.cancel': '취소',
+    'btn.save': '저장',
+    'btn.delete': '삭제',
+    'btn.edit': '수정',
+    'btn.back': '뒤로',
+    'btn.confirm': '확인',
+
+    // Library card
+    'lib.questions': '{n}개 문제',
+    'lib.open': '열기 →',
+    'lib.edit': '편집',
+    'lib.delete': '삭제',
+    'lib.confirmDelete': '{name} 문제 은행을 삭제할까요? {n}개 문제가 모두 제거됩니다.',
+
+    // Footer / meta
+    'meta.students': '학생',
+    'meta.library': '문제 은행',
+    'meta.libraries': '문제 은행',
+    'meta.question': '문제',
+    'meta.questions': '문제',
+
+    // Days
+    'day.mon': '월', 'day.tue': '화', 'day.wed': '수', 'day.thu': '목',
+    'day.fri': '금', 'day.sat': '토', 'day.sun': '일',
+
+    // iOS install guide
+    'install.ios.title': '홈 화면에 추가',
+    'install.ios.step1': 'Safari 하단의 공유 버튼을 탭하세요',
+    'install.ios.step2': "홈 화면에 추가를 탭하세요",
+    'install.ios.step3': '전체 앱 경험을 즐기세요',
+    'install.ios.gotIt': '확인',
+    'install.ios.later': '나중에'
   }
 };
 
-const I18N_LANGS = ['en', 'es', 'vi', 'zh'];
-const I18N_LANG_NAMES = { en: 'English', es: 'Español', vi: 'Tiếng Việt', zh: '中文' };
-const I18N_LANG_FLAGS = { en: '🇺🇸', es: '🇪🇸', vi: '🇻🇳', zh: '🇨🇳' };
+const I18N_LANGS = ['en', 'es', 'vi', 'zh', 'ko'];
+const I18N_LANG_NAMES = { en: 'English', es: 'Español', vi: 'Tiếng Việt', zh: '中文', ko: '한국어' };
+const I18N_LANG_FLAGS = { en: '🇺🇸', es: '🇪🇸', vi: '🇻🇳', zh: '🇨🇳', ko: '🇰🇷' };
 
 const i18n = {
   current: 'en',
@@ -1100,6 +1365,7 @@ const i18n = {
     if (nav.startsWith('zh')) return 'zh';
     if (nav.startsWith('es')) return 'es';
     if (nav.startsWith('vi')) return 'vi';
+    if (nav.startsWith('ko')) return 'ko';
     if (nav.startsWith('en')) return 'en';
     return 'en';
   },
