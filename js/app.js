@@ -1845,9 +1845,22 @@ function parseQuestionsFromText(text) {
       || line.match(/^Q\s*(\d+)[.、)）:\s]\s*(.+)/i);
     const isStemByQuestion = !qMatch && /[?？]\s*$/.test(line) && line.length > 8;
     if (qMatch || isStemByQuestion) {
-      const stem = (qMatch ? qMatch[2] : line).trim();
+      let stem = (qMatch ? qMatch[2] : line).trim();
       const q = { type: 'single', stem, options: [], answer: null, explanation: '' };
       i++;
+      // Bilingual stems: if the detected stem has no CJK (e.g. English) and the next
+      // line is a CJK translation (not an option / answer / new-question), merge it in
+      // so "EN stem\nZH translation" inputs aren't split into two questions.
+      while (i < lines.length) {
+        const nxt = lines[i];
+        const isOpt = /^[A-Za-z\d][.、)）\s]|^[（(]\s*[A-Za-z\d]/.test(nxt);
+        const isAns = isAnswerLine(nxt) || /^(解析|explanation|analysis|说明|rationale)\s*[:：.\s]/i.test(nxt);
+        const isNewQ = /^(\d+)[.、)）\s]|^第?\s*\d+\s*[题个]|^Q\s*\d+/i.test(nxt);
+        if (!/[\u4e00-\u9fff]/.test(stem) && !isOpt && !isAns && !isNewQ && /[\u4e00-\u9fff]/.test(nxt) && nxt.length > 1) {
+          stem = (stem + ' ' + nxt).trim();
+          i++;
+        } else { break; }
+      }
       // Collect options: A. / a) / (A) / 1. / ①
       while (i < lines.length) {
         const optMatch = lines[i].match(/^([A-Za-z])[.、)）\s]\s*(.+)/)
