@@ -100,13 +100,24 @@
 
   window.deleteVideoAdmin = async function (id, bunnyId) {
     if (!confirm(i18n.t('video.admin.confirmDelete'))) return;
+    const sel = document.getElementById('vidLibSelect');
+    const libVal = sel ? sel.value : '';
     try {
-      await window.Bunny.deleteVideo(bunnyId);
-      await vdb.from('videos').delete().eq('id', id);
+      // 1) Delete the DB row FIRST — this is what controls the list the admin sees.
+      const { error } = await vdb.from('videos').delete().eq('id', id);
+      if (error) throw error;
       toast(i18n.t('video.admin.deleted'));
-      const sel = document.getElementById('vidLibSelect');
-      if (sel) renderAdminList(sel.value);
-    } catch (e) { toast(i18n.t('video.admin.fail') + e.message); }
+      renderAdminList(libVal);
+      // 2) Best-effort Bunny cleanup — must NOT block the local delete on API/CORS errors.
+      if (bunnyId) {
+        try {
+          await window.Bunny.deleteVideo(bunnyId);
+        } catch (e) {
+          console.warn('Bunny video cleanup failed:', e);
+          toast(i18n.t('video.admin.bunnyCleanupWarn'));
+        }
+      }
+    } catch (e) { toast(i18n.t('video.admin.deleteFail') + e.message); }
   };
 
   async function adminUpload(libraryId) {
