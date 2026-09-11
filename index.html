@@ -163,9 +163,22 @@
           <div class="section-title" data-page-node-id="UTxC3sJdPkwVjhyufmfXiI">
             <h3 data-i18n="home.section.libraries" data-page-node-id="NS3pH489NU0iotDf4r3o1P">My Libraries</h3>
             <span class="section-more" data-go="library" data-i18n="home.section.manage" data-page-node-id="f4G59guohUVBA5XjPLj90z">Manage →</span>
-            <span class="section-more" id="studentVideosLink" onclick="openStudentVideos()" style="margin-left:10px">📹 视频 →</span>
           </div>
           <div class="library-cards" id="libraryCards" data-page-node-id="0J3EfWdIMFIHAjE2MBWQpv"></div>
+        </div>
+
+        <div class="section-block" id="studentVideoSection">
+          <div class="section-title">
+            <h3>📹 视频课程 / Video Lessons</h3>
+          </div>
+          <div class="video-banner" onclick="openStudentVideos()">
+            <div class="vb-icon">📹</div>
+            <div class="vb-text">
+              <div class="vb-title">观看教学视频 Watch Videos</div>
+              <div class="vb-sub">按学科分类 · 每周更新 Weekly lessons</div>
+            </div>
+            <div class="vb-arrow">›</div>
+          </div>
         </div>
 
         <div class="bottom-safe" data-page-node-id="dn3dcQunNkgWELZ0qjUxco"></div>
@@ -178,7 +191,6 @@
           <button class="back-btn" data-back data-page-node-id="GjoKE9edeOqtCLstLylzxl">‹</button>
           <h2 class="page-title" data-i18n="library.title" data-page-node-id="bGyI14NdtyRSMw48OhKuCQ">Library</h2>
           <button class="h-icon-btn admin-only" id="addLibraryPageBtn" data-i18n-title="library.add" title="Add Library" data-page-node-id="FJfIacmXbPMcdEBWKNTC0N">＋</button>
-          <button class="h-icon-btn admin-only" id="videoManagerBtn" title="视频管理" onclick="openVideoManager()">📹</button>
         </header>
 
         <div class="search-bar" data-page-node-id="He8OtWONNo1SpzizqtxNuG">
@@ -461,6 +473,11 @@
             <div class="mt-icon" style="background:#E0F4FF" data-page-node-id="HZcAFKJFoveYWfalOgMka5">📄</div>
             <div class="mt-title" data-i18n="manage.importWord" data-page-node-id="spNhlMOrz0nHGZ32Ibkrb0">Import Word</div>
             <div class="mt-desc" data-i18n="manage.importWord.sub" data-page-node-id="E8pdLfoRPbBfVeUCD5MVHs">.docx / .doc file</div>
+          </div>
+          <div class="manage-tile admin-only" id="uploadVideoTile" onclick="openVideoManager()">
+            <div class="mt-icon" style="background:#E7EEFF">📹</div>
+            <div class="mt-title">上传视频 Upload Video</div>
+            <div class="mt-desc">按学科上传 MP4 · Upload MP4 by subject</div>
           </div>
           <div class="manage-tile" id="importJsonTile" data-page-node-id="3LFfMRmSIMSZgUZim6Y7rv">
             <div class="mt-icon" style="background:#F4E7FF" data-page-node-id="diUN4Xb73nOjvKsArYYckL">📋</div>
