@@ -667,6 +667,59 @@ body {
 .vb-sub { font-size: 12px; opacity: 0.9; }
 .vb-arrow { font-size: 26px; opacity: 0.9; flex-shrink: 0; }
 
+/* ============ Video feature (admin + student) ============ */
+.vb-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 20px; height: 20px; padding: 0 6px;
+  background: #ff3b30; color: #fff; border-radius: 999px;
+  font-size: 12px; font-weight: 700; line-height: 1; margin-left: 8px;
+}
+.vb-badge.hidden { display: none; }
+
+/* Admin upload */
+.video-toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+.vid-select {
+  flex: 1; min-width: 140px; padding: 10px 12px; border: 1px solid var(--border, #e6e6ee);
+  border-radius: 10px; background: var(--bg, #fff); color: inherit; font-size: 14px;
+}
+.vid-count { font-size: 13px; color: var(--primary); font-weight: 600; white-space: nowrap; }
+.video-upload { background: var(--bg-soft, #f6f7fb); border: 1px solid var(--border, #e6e6ee); border-radius: 12px; padding: 12px; margin-bottom: 14px; }
+.vid-row { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+.vid-file { flex: 1; min-width: 160px; font-size: 13px; }
+.vid-title, .vid-week { flex: 1; min-width: 140px; padding: 10px 12px; border: 1px solid var(--border, #e6e6ee); border-radius: 10px; font-size: 14px; }
+.progress { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.progress.hidden { display: none; }
+.progress-bar { flex: 1; height: 8px; border-radius: 999px; background: linear-gradient(90deg, #5B8DEF, #7C5CEF); width: 0%; transition: width .2s; }
+#vidPct { font-size: 12px; color: var(--primary); font-weight: 600; min-width: 38px; text-align: right; }
+.video-list { display: flex; flex-direction: column; gap: 10px; }
+.video-card { display: flex; align-items: center; gap: 12px; background: var(--bg, #fff); border: 1px solid var(--border, #e6e6ee); border-radius: 12px; padding: 12px; }
+.vc-info { flex: 1; min-width: 0; }
+.vc-title { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+.vc-meta { font-size: 12px; color: var(--text-muted, #8a8a99); }
+
+/* Student watch — grouped by subject */
+.video-subject-group { margin-bottom: 18px; }
+.vsg-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.vsg-name { font-size: 15px; font-weight: 700; }
+.vsg-count { font-size: 12px; color: #fff; background: var(--primary); border-radius: 999px; padding: 1px 8px; font-weight: 700; }
+.video-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+.video-card-block {
+  position: relative; background: var(--bg, #fff); border: 1px solid var(--border, #e6e6ee);
+  border-radius: 14px; padding: 14px; overflow: hidden;
+}
+.video-card-block.is-watched { opacity: 0.92; }
+.vc-dot {
+  position: absolute; top: 12px; right: 12px; width: 10px; height: 10px; border-radius: 50%;
+  background: #ff3b30; box-shadow: 0 0 0 3px rgba(255, 59, 48, .18);
+}
+.vc-player { margin-top: 10px; }
+.vc-play {
+  width: 100%; padding: 12px; border: none; border-radius: 10px; cursor: pointer;
+  background: linear-gradient(135deg, #5B8DEF, #7C5CEF); color: #fff; font-size: 14px; font-weight: 600;
+}
+.vc-play:active { transform: scale(0.99); }
+.video-iframe { width: 100%; aspect-ratio: 16 / 9; border: none; border-radius: 12px; margin-top: 8px; background: #000; }
+
 /* ============ Page Header ============ */
 .page-header {
   display: flex;

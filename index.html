@@ -169,13 +169,14 @@
 
         <div class="section-block" id="studentVideoSection">
           <div class="section-title">
-            <h3>📹 视频课程 / Video Lessons</h3>
+            <h3 data-i18n="video.section.title">Video Lessons</h3>
+            <span class="vb-badge hidden" id="videoUnseenBadge"></span>
           </div>
           <div class="video-banner" onclick="openStudentVideos()">
             <div class="vb-icon">📹</div>
             <div class="vb-text">
-              <div class="vb-title">观看教学视频 Watch Videos</div>
-              <div class="vb-sub">按学科分类 · 每周更新 Weekly lessons</div>
+              <div class="vb-title" data-i18n="video.banner.title">Watch Videos</div>
+              <div class="vb-sub" data-i18n="video.banner.sub">By subject · updated weekly</div>
             </div>
             <div class="vb-arrow">›</div>
           </div>
@@ -476,8 +477,8 @@
           </div>
           <div class="manage-tile admin-only" id="uploadVideoTile" onclick="openVideoManager()">
             <div class="mt-icon" style="background:#E7EEFF">📹</div>
-            <div class="mt-title">上传视频 Upload Video</div>
-            <div class="mt-desc">按学科上传 MP4 · Upload MP4 by subject</div>
+            <div class="mt-title" data-i18n="manage.uploadVideo">Upload Video</div>
+            <div class="mt-desc" data-i18n="manage.uploadVideo.sub">Upload MP4 by subject</div>
           </div>
           <div class="manage-tile" id="importJsonTile" data-page-node-id="3LFfMRmSIMSZgUZim6Y7rv">
             <div class="mt-icon" style="background:#F4E7FF" data-page-node-id="diUN4Xb73nOjvKsArYYckL">📋</div>
@@ -809,7 +810,7 @@
   <div id="videoModal" class="modal hidden">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 id="videoModalTitle">视频</h3>
+        <h3 id="videoModalTitle" data-i18n="video.modal.title">Videos</h3>
         <button class="modal-close" onclick="closeModal('videoModal')">×</button>
       </div>
       <div class="modal-body" id="videoModalBody"></div>

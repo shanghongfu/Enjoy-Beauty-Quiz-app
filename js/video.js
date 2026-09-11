@@ -1,7 +1,8 @@
 // ============================================================
 // video.js — subject-categorized video UI for admin (upload/delete)
 // and students (watch). Talks to Supabase `videos` table + Bunny Stream.
-// Depends on globals from app.js: currentUser, toast, openModal, closeModal.
+// Depends on globals from app.js: currentUser, toast, openModal, closeModal,
+// and from i18n.js: i18n (t / apply / languageChanged).
 // ============================================================
 (function () {
   const vdb = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
@@ -26,21 +27,32 @@
     return data || [];
   }
 
+  // ---------------- Watched tracking (per student, localStorage) ----------------
+  function watchKey(id) {
+    return 'vidseen_' + (currentUser ? currentUser.id : 'anon') + '_' + id;
+  }
+  function isWatched(id) {
+    try { return localStorage.getItem(watchKey(id)) === '1'; } catch (e) { return false; }
+  }
+  function markWatched(id) {
+    try { localStorage.setItem(watchKey(id), '1'); } catch (e) {}
+  }
+
   // ---------------- Admin: upload + manage ----------------
   window.openVideoManager = async function () {
     if (!window.BUNNY_LIBRARY_ID || !window.BUNNY_API_KEY) {
-      alert('视频功能尚未配置 Bunny Stream（请联系管理员填写 js/bunny-config.js 的 Library ID 与 API Key）。');
+      alert(i18n.t('video.admin.notConfigured'));
       return;
     }
     let libs;
     try { libs = await loadLibraries(); }
-    catch (e) { toast('加载学科失败: ' + e.message); return; }
+    catch (e) { toast(i18n.t('video.admin.loadLibFail') + e.message); return; }
 
     const body = document.getElementById('videoModalBody');
     body.innerHTML =
       '<div class="video-toolbar">' +
         '<select id="vidLibSelect" class="vid-select">' +
-          '<option value="">— 选择学科 —</option>' +
+          '<option value="">' + esc(i18n.t('video.admin.subject.placeholder')) + '</option>' +
           libs.map(function (l) { return '<option value="' + l.id + '">' + esc(l.name) + '</option>'; }).join('') +
         '</select>' +
         '<span class="vid-count" id="vidCount"></span>' +
@@ -48,11 +60,11 @@
       '<div class="video-upload">' +
         '<div class="vid-row">' +
           '<input type="file" id="vidFile" accept="video/*" class="vid-file">' +
-          '<input type="text" id="vidTitle" placeholder="视频标题（如：第3周 护肤理论）" class="vid-title">' +
+          '<input type="text" id="vidTitle" placeholder="' + esc(i18n.t('video.admin.title.ph')) + '" class="vid-title">' +
         '</div>' +
         '<div class="vid-row">' +
-          '<input type="text" id="vidWeek" placeholder="周标签（可选，如：Week 3）" class="vid-week">' +
-          '<button id="vidUploadBtn" class="btn btn-primary">上传视频</button>' +
+          '<input type="text" id="vidWeek" placeholder="' + esc(i18n.t('video.admin.week.ph')) + '" class="vid-week">' +
+          '<button id="vidUploadBtn" class="btn btn-primary">' + esc(i18n.t('video.admin.upload')) + '</button>' +
         '</div>' +
         '<div class="progress hidden" id="vidProgress"><div class="progress-bar" id="vidProgressBar"></div><span id="vidPct">0%</span></div>' +
       '</div>' +
@@ -69,39 +81,39 @@
   async function renderAdminList(libraryId) {
     const list = document.getElementById('vidList');
     const cnt = document.getElementById('vidCount');
-    if (!libraryId) { list.innerHTML = '<p class="muted">请选择学科</p>'; return; }
-    list.innerHTML = '<p class="muted">加载中…</p>';
+    if (!libraryId) { list.innerHTML = '<p class="muted">' + esc(i18n.t('video.admin.subject.placeholder')) + '</p>'; return; }
+    list.innerHTML = '<p class="muted">' + esc(i18n.t('video.admin.loading')) + '</p>';
     let rows;
     try { rows = await loadVideos(libraryId); }
-    catch (e) { list.innerHTML = '<p class="err">加载失败: ' + esc(e.message) + '</p>'; return; }
-    cnt.textContent = rows.length + ' 个视频';
-    if (!rows.length) { list.innerHTML = '<p class="muted">该学科还没有视频</p>'; return; }
+    catch (e) { list.innerHTML = '<p class="err">' + esc(i18n.t('video.admin.fail')) + esc(e.message) + '</p>'; return; }
+    cnt.textContent = i18n.t('video.admin.count', { n: rows.length });
+    if (!rows.length) { list.innerHTML = '<p class="muted">' + esc(i18n.t('video.admin.empty')) + '</p>'; return; }
     list.innerHTML = rows.map(function (v) {
       return '<div class="video-card">' +
         '<div class="vc-info"><div class="vc-title">' + esc(v.title) + '</div>' +
         '<div class="vc-meta">' + (v.week_label ? esc(v.week_label) + ' · ' : '') +
         new Date(v.created_at).toLocaleDateString() + '</div></div>' +
-        '<button class="btn btn-danger btn-sm" onclick="window.deleteVideoAdmin(\'' + v.id + '\',\'' + v.bunny_video_id + '\')">删除</button>' +
+        '<button class="btn btn-danger btn-sm" onclick="window.deleteVideoAdmin(\'' + v.id + '\',\'' + v.bunny_video_id + '\')">' + esc(i18n.t('btn.delete')) + '</button>' +
       '</div>';
     }).join('');
   }
 
   window.deleteVideoAdmin = async function (id, bunnyId) {
-    if (!confirm('确定删除这个视频？')) return;
+    if (!confirm(i18n.t('video.admin.confirmDelete'))) return;
     try {
       await window.Bunny.deleteVideo(bunnyId);
       await vdb.from('videos').delete().eq('id', id);
-      toast('已删除');
+      toast(i18n.t('video.admin.deleted'));
       const sel = document.getElementById('vidLibSelect');
       if (sel) renderAdminList(sel.value);
-    } catch (e) { toast('删除失败: ' + e.message); }
+    } catch (e) { toast(i18n.t('video.admin.fail') + e.message); }
   };
 
   async function adminUpload(libraryId) {
-    if (!libraryId) { toast('请先选择学科'); return; }
+    if (!libraryId) { toast(i18n.t('video.admin.selectSubjectFirst')); return; }
     const fileInput = document.getElementById('vidFile');
     const file = fileInput.files && fileInput.files[0];
-    if (!file) { toast('请选择 MP4 文件'); return; }
+    if (!file) { toast(i18n.t('video.admin.noFile')); return; }
     const title = (document.getElementById('vidTitle').value || file.name).trim();
     const week = document.getElementById('vidWeek').value.trim();
     const btn = document.getElementById('vidUploadBtn');
@@ -110,9 +122,9 @@
     const pct = document.getElementById('vidPct');
     btn.disabled = true; prog.classList.remove('hidden'); bar.style.width = '0%'; pct.textContent = '0%';
     try {
-      toast('正在创建视频…');
+      toast(i18n.t('video.admin.creating'));
       const guid = await window.Bunny.createVideo(title);
-      toast('正在上传（2G 约需几分钟，支持断点续传）…');
+      toast(i18n.t('video.admin.uploading'));
       await window.Bunny.uploadTus(file, guid, title, function (p) { bar.style.width = p + '%'; pct.textContent = p + '%'; });
       await vdb.from('videos').insert({
         library_id: libraryId,
@@ -121,41 +133,101 @@
         week_label: week || null,
         uploaded_by: (currentUser ? currentUser.id : null)
       });
-      toast('上传完成！视频转码中，稍候即可播放');
+      toast(i18n.t('video.admin.done'));
       fileInput.value = ''; document.getElementById('vidTitle').value = ''; document.getElementById('vidWeek').value = '';
       prog.classList.add('hidden');
       renderAdminList(libraryId);
     } catch (e) {
-      toast('上传失败: ' + e.message);
+      toast(i18n.t('video.admin.fail') + e.message);
       prog.classList.add('hidden');
     } finally {
       btn.disabled = false;
     }
   }
 
-  // ---------------- Student: watch by subject ----------------
+  // ---------------- Student: watch by subject (grouped) + unwatched dots ----------------
   window.openStudentVideos = async function () {
     const body = document.getElementById('videoModalBody');
-    body.innerHTML = '<p class="muted">加载中…</p>';
+    body.innerHTML = '<p class="muted">' + esc(i18n.t('video.student.loading')) + '</p>';
     openModal('videoModal');
     const libs = (currentUser && currentUser.libraries) || [];
-    if (!libs.length) { body.innerHTML = '<p class="muted">你还没有被分配学科</p>'; return; }
+    if (!libs.length) { body.innerHTML = '<p class="muted">' + esc(i18n.t('video.student.noLib')) + '</p>'; return; }
     let rows;
     try { rows = await loadVideos(null); }
-    catch (e) { body.innerHTML = '<p class="err">加载失败: ' + esc(e.message) + '</p>'; return; }
+    catch (e) { body.innerHTML = '<p class="err">' + esc(i18n.t('video.student.fail')) + esc(e.message) + '</p>'; return; }
     const assigned = libs.map(String);
     rows = rows.filter(function (v) { return assigned.indexOf(String(v.library_id)) !== -1; });
-    if (!rows.length) { body.innerHTML = '<p class="muted">该学科暂无视频</p>'; return; }
     const { data: libRows } = await vdb.from('libraries').select('id,name').in('id', libs);
-    const nameMap = {}; (libRows || []).forEach(function (l) { nameMap[l.id] = l.name; });
-    body.innerHTML = '<div class="video-grid">' + rows.map(function (v) {
-      return '<div class="video-card-block">' +
-        '<div class="vc-title">' + esc(v.title) + '</div>' +
-        '<div class="vc-meta">' + (nameMap[v.library_id] ? esc(nameMap[v.library_id]) + ' · ' : '') +
-        (v.week_label ? esc(v.week_label) + ' · ' : '') + new Date(v.created_at).toLocaleDateString() + '</div>' +
-        '<iframe class="video-iframe" src="' + window.Bunny.embedUrl(v.bunny_video_id) +
-        '" loading="lazy" allow="autoplay; fullscreen" allowfullscreen></iframe>' +
+    const groups = [];
+    (libRows || []).forEach(function (l) {
+      const gv = rows.filter(function (v) { return String(v.library_id) === String(l.id); });
+      if (gv.length) groups.push({ name: l.name, videos: gv });
+    });
+    if (!groups.length) { body.innerHTML = '<p class="muted">' + esc(i18n.t('video.student.empty')) + '</p>'; return; }
+    body.innerHTML = groups.map(function (g) {
+      return '<div class="video-subject-group">' +
+        '<div class="vsg-head"><span class="vsg-name">' + esc(g.name) + '</span>' +
+        '<span class="vsg-count">' + g.videos.length + '</span></div>' +
+        '<div class="video-grid">' + g.videos.map(studentCardHtml).join('') + '</div>' +
       '</div>';
-    }).join('') + '</div>';
+    }).join('');
   };
+
+  function studentCardHtml(v) {
+    const seen = isWatched(v.id);
+    return '<div class="video-card-block' + (seen ? ' is-watched' : '') + '" id="vcb-' + esc(v.id) + '">' +
+      (seen ? '' : '<span class="vc-dot" title="' + esc(i18n.t('video.student.watched')) + '"></span>') +
+      '<div class="vc-title">' + esc(v.title) + '</div>' +
+      '<div class="vc-meta">' + (v.week_label ? esc(v.week_label) + ' · ' : '') +
+      new Date(v.created_at).toLocaleDateString() + '</div>' +
+      '<div class="vc-player" id="vcplayer-' + esc(v.id) + '">' +
+        '<button class="vc-play" onclick="window.playStudentVideo(\'' + esc(v.id) + '\',\'' + esc(v.bunny_video_id) + '\')">▶ ' + esc(i18n.t('video.student.play')) + '</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  window.playStudentVideo = function (id, bunnyId) {
+    const box = document.getElementById('vcplayer-' + id);
+    if (!box) return;
+    box.innerHTML = '<iframe class="video-iframe" src="' + window.Bunny.embedUrl(bunnyId) +
+      '" allow="autoplay; fullscreen" allowfullscreen></iframe>';
+    if (!isWatched(id)) {
+      markWatched(id);
+      const card = document.getElementById('vcb-' + id);
+      if (card) { const d = card.querySelector('.vc-dot'); if (d) d.remove(); card.classList.add('is-watched'); }
+      if (window.refreshStudentVideoBadge) window.refreshStudentVideoBadge();
+    }
+  };
+
+  // ---------------- Banner unseen badge (home) ----------------
+  window.refreshStudentVideoBadge = async function () {
+    const badge = document.getElementById('videoUnseenBadge');
+    if (!badge) return;
+    if (!currentUser || !currentUser.libraries || !currentUser.libraries.length) { badge.classList.add('hidden'); return; }
+    try {
+      const libs = currentUser.libraries.map(String);
+      const { data, error } = await vdb.from('videos').select('id,library_id').in('library_id', libs);
+      if (error) throw error;
+      const unseen = (data || []).filter(function (v) { return !isWatched(v.id); }).length;
+      if (unseen > 0) {
+        badge.textContent = unseen > 99 ? '99+' : String(unseen);
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+    } catch (e) { badge.classList.add('hidden'); }
+  };
+
+  // Best-effort: refresh the unseen badge whenever the home screen re-renders
+  // (renderHome is a global function in app.js, a classic script) or language changes.
+  if (typeof window.renderHome === 'function') {
+    const _orig = window.renderHome;
+    window.renderHome = function () {
+      _orig.apply(this, arguments);
+      if (window.refreshStudentVideoBadge) window.refreshStudentVideoBadge();
+    };
+  }
+  window.addEventListener('languageChanged', function () {
+    if (window.refreshStudentVideoBadge) window.refreshStudentVideoBadge();
+  });
 })();
