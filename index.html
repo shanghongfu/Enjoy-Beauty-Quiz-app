@@ -15,6 +15,26 @@
   <link rel="stylesheet" href="css/style.css" data-page-node-id="FEwBQB39z5wqZiHTbjnHDs">
   <title>Enjoy Beauty · 美业学习</title>
 
+  <style>
+    .video-toolbar{display:flex;gap:8px;align-items:center;margin-bottom:12px}
+    .vid-select{flex:1;padding:8px;border-radius:8px;border:1px solid var(--border,#ddd);background:var(--bg,#fff);color:inherit}
+    .vid-count{font-size:12px;color:#888}
+    .video-upload{background:var(--bg2,#f7f7f9);border-radius:10px;padding:12px;margin-bottom:12px}
+    .vid-row{display:flex;gap:8px;margin-bottom:8px}
+    .vid-file{flex:1}.vid-title{flex:1}.vid-week{flex:1}
+    .progress{height:18px;background:#eee;border-radius:9px;overflow:hidden;position:relative;margin-top:4px}
+    .progress-bar{height:100%;background:#FF6B9D;width:0;transition:width .2s}
+    .progress span{position:absolute;right:8px;top:0;font-size:12px;line-height:18px}
+    .video-list{display:flex;flex-direction:column;gap:8px}
+    .video-card{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px;border:1px solid var(--border,#eee);border-radius:10px}
+    .vc-info{flex:1;min-width:0}
+    .vc-title{font-weight:600;word-break:break-word}.vc-meta{font-size:12px;color:#888;margin-top:2px}
+    .video-grid{display:grid;grid-template-columns:1fr;gap:14px}
+    .video-card-block{border:1px solid var(--border,#eee);border-radius:12px;overflow:hidden;background:var(--bg,#fff)}
+    .video-iframe{width:100%;aspect-ratio:16/9;border:0;display:block}
+    .btn-sm{padding:4px 10px;font-size:13px}
+    .muted{color:#999;font-size:13px}.err{color:#e53e3e;font-size:13px}
+  </style>
 </head>
 <body data-page-node-id="BY0CqfLfbdFBXeXHMfxyjV">
   <!-- Splash Screen -->
@@ -143,6 +163,7 @@
           <div class="section-title" data-page-node-id="UTxC3sJdPkwVjhyufmfXiI">
             <h3 data-i18n="home.section.libraries" data-page-node-id="NS3pH489NU0iotDf4r3o1P">My Libraries</h3>
             <span class="section-more" data-go="library" data-i18n="home.section.manage" data-page-node-id="f4G59guohUVBA5XjPLj90z">Manage →</span>
+            <span class="section-more" id="studentVideosLink" onclick="openStudentVideos()" style="margin-left:10px">📹 视频 →</span>
           </div>
           <div class="library-cards" id="libraryCards" data-page-node-id="0J3EfWdIMFIHAjE2MBWQpv"></div>
         </div>
@@ -157,6 +178,7 @@
           <button class="back-btn" data-back data-page-node-id="GjoKE9edeOqtCLstLylzxl">‹</button>
           <h2 class="page-title" data-i18n="library.title" data-page-node-id="bGyI14NdtyRSMw48OhKuCQ">Library</h2>
           <button class="h-icon-btn admin-only" id="addLibraryPageBtn" data-i18n-title="library.add" title="Add Library" data-page-node-id="FJfIacmXbPMcdEBWKNTC0N">＋</button>
+          <button class="h-icon-btn admin-only" id="videoManagerBtn" title="视频管理" onclick="openVideoManager()">📹</button>
         </header>
 
         <div class="search-bar" data-page-node-id="He8OtWONNo1SpzizqtxNuG">
@@ -766,6 +788,17 @@
     </div>
   </div>
 
+  <!-- ========== Video Modal (admin upload + student watch) ========== -->
+  <div id="videoModal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="videoModalTitle">视频</h3>
+        <button class="modal-close" onclick="closeModal('videoModal')">×</button>
+      </div>
+      <div class="modal-body" id="videoModalBody"></div>
+    </div>
+  </div>
+
   <!-- Hidden file input -->
   <input type="file" id="fileInput" accept=".json,.docx,.doc" style="display:none" data-page-node-id="zvA5xURcEb7OSfAdi3lFI9">
 
@@ -786,5 +819,9 @@
   <script src="js/jszip.min.js"></script>
   <script src="js/i18n.js"></script>
   <script src="js/app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tus-js-client@4/dist/tus.min.js"></script>
+  <script src="js/bunny-config.js"></script>
+  <script src="js/bunny.js"></script>
+  <script src="js/video.js"></script>
 </body>
 </html>
