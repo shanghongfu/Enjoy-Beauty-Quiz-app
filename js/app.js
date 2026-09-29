@@ -1142,48 +1142,63 @@ function onExamTimeout() {
 }
 
 function renderQuestion() {
-  const q = session.questions[session.index];
-  const total = session.questions.length;
-  $('progressText').textContent = `${session.index + 1}/${total}`;
-  $('progressFill').style.width = ((session.index + 1) / total * 100) + '%';
+  try {
+    const q = session.questions[session.index];
+    // Defensive: a missing question (e.g. draft out of sync) must never leave the
+    // screen frozen with an empty question area + a disabled submit button.
+    if (!q) {
+      console.error('renderQuestion: no question at index', session.index);
+      if (session.index < session.questions.length - 1) { session.index++; renderQuestion(); return; }
+      finishPractice();
+      return;
+    }
+    const total = session.questions.length;
+    $('progressText').textContent = `${session.index + 1}/${total}`;
+    $('progressFill').style.width = ((session.index + 1) / total * 100) + '%';
 
-  const typeMap = { single: 'Single Choice', multiple: 'Multiple Choice', judge: 'True / False' };
-  $('questionTypeBadge').textContent = typeMap[q.type];
-  $('questionText').textContent = q.stem;
+    const typeMap = { single: 'Single Choice', multiple: 'Multiple Choice', judge: 'True / False' };
+    $('questionTypeBadge').textContent = typeMap[q.type] || 'Single Choice';
+    $('questionText').textContent = q.stem || '';
 
-  const optsEl = $('optionsList');
-  optsEl.innerHTML = '';
+    const optsEl = $('optionsList');
+    optsEl.innerHTML = '';
 
-  if (q.type === 'judge') {
-    ['True', 'False'].forEach((opt, i) => {
-      const div = document.createElement('div');
-      div.className = 'opt-item';
-      div.innerHTML = `<div class="opt-letter">${i === 0 ? 'T' : 'F'}</div><div class="opt-text">${escapeHtml(opt)}</div>`;
-      div.addEventListener('click', () => onSelect(i, q.type));
-      optsEl.appendChild(div);
-    });
-  } else {
-    q.options.forEach((opt, i) => {
-      const div = document.createElement('div');
-      div.className = 'opt-item';
-      const letter = String.fromCharCode(65 + i);
-      div.innerHTML = `<div class="opt-letter">${letter}</div><div class="opt-text">${escapeHtml(opt)}</div>`;
-      div.addEventListener('click', () => onSelect(i, q.type));
-      optsEl.appendChild(div);
-    });
-  }
+    if (q.type === 'judge') {
+      ['True', 'False'].forEach((opt, i) => {
+        const div = document.createElement('div');
+        div.className = 'opt-item';
+        div.innerHTML = `<div class="opt-letter">${i === 0 ? 'T' : 'F'}</div><div class="opt-text">${escapeHtml(opt)}</div>`;
+        div.addEventListener('click', () => onSelect(i, q.type));
+        optsEl.appendChild(div);
+      });
+    } else {
+      (q.options || []).forEach((opt, i) => {
+        const div = document.createElement('div');
+        div.className = 'opt-item';
+        const letter = String.fromCharCode(65 + i);
+        div.innerHTML = `<div class="opt-letter">${letter}</div><div class="opt-text">${escapeHtml(opt)}</div>`;
+        div.addEventListener('click', () => onSelect(i, q.type));
+        optsEl.appendChild(div);
+      });
+    }
 
-  $('explanation').classList.add('hidden');
-  $('submitAnswer').classList.remove('hidden');
-  $('nextQuestion').classList.add('hidden');
-  $('submitAnswer').disabled = true;
+    $('explanation').classList.add('hidden');
+    $('submitAnswer').classList.remove('hidden');
+    $('nextQuestion').classList.add('hidden');
+    $('submitAnswer').disabled = true;
 
-  const prev = session.answers[session.index];
-  if (prev !== null) {
-    const arr = Array.isArray(prev) ? prev : [prev];
-    arr.forEach(i => optsEl.children[i].classList.add('selected'));
-    addOptionMarks(optsEl.children, q, prev, checkAnswer(q, prev));
-    $('submitAnswer').disabled = false;
+    const prev = session.answers[session.index];
+    if (prev !== null) {
+      const arr = Array.isArray(prev) ? prev : [prev];
+      // Guard against out-of-range saved answers (e.g. question edited after the
+      // draft was saved) so we never throw and freeze the screen.
+      arr.forEach(i => { if (optsEl.children[i]) optsEl.children[i].classList.add('selected'); });
+      addOptionMarks(optsEl.children, q, prev, checkAnswer(q, prev));
+      $('submitAnswer').disabled = false;
+    }
+  } catch (e) {
+    console.error('renderQuestion failed', e);
+    toast('Unable to load this question');
   }
 }
 
