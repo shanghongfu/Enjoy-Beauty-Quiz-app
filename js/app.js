@@ -675,8 +675,7 @@ function renderHome() {
     });
     continueEl.querySelectorAll('.continue-card').forEach(c => {
       c.addEventListener('click', () => {
-        go('practicePage');
-        setTimeout(async () => { await startPractice('sequential', c.dataset.lib); }, 100);
+        enterPracticeOrResume(async () => startPractice('sequential', c.dataset.lib));
       });
     });
   }
@@ -708,8 +707,7 @@ function renderHome() {
     });
     lcEl.querySelectorAll('.lib-card').forEach(c => {
       c.addEventListener('click', () => {
-        go('practicePage');
-        setTimeout(async () => { await startPractice('sequential', c.dataset.lib); }, 100);
+        enterPracticeOrResume(async () => startPractice('sequential', c.dataset.lib));
       });
     });
   }
@@ -722,9 +720,7 @@ $('startDailyBtn').addEventListener('click', () => {
     go('managePage');
     return;
   }
-  go('practicePage');
-  setTimeout(async () => { await startPractice('random'); }, 100);
-  updateStreak();
+  enterPracticeOrResume(async () => { await startPractice('random'); updateStreak(); });
 });
 
 // Category grid (4 modes)
@@ -736,15 +732,14 @@ $$('.cat-item').forEach(c => {
       return;
     }
     const mode = c.dataset.mode;
-    go('practicePage');
-    setTimeout(async () => {
-      if (mode === 'wrong') {
+    if (mode === 'wrong') {
+      enterPracticeOrResume(async () => {
         if (stats.wrongIds.length === 0) { toast('No wrong questions yet'); return; }
         await startPractice('wrong', null);
-      } else {
-        renderPracticeSetup(mode);
-      }
-    }, 100);
+      });
+    } else {
+      enterPracticeOrResume(() => renderPracticeSetup(mode));
+    }
   });
 });
 
@@ -802,8 +797,7 @@ function renderLibraryFull() {
 
   list.querySelectorAll('.lib-card').forEach(c => {
     c.addEventListener('click', () => {
-      go('practicePage');
-      setTimeout(() => startPractice('sequential', c.dataset.lib), 100);
+      enterPracticeOrResume(() => startPractice('sequential', c.dataset.lib));
     });
   });
 }
@@ -874,6 +868,20 @@ async function loadLiveQuestionsForLibrary(libraryId) {
       };
     });
   } catch (_) { return []; }
+}
+
+// Enter the practice page. If an unfinished session is saved, land on the setup
+// screen so the blue "resume" banner shows — instead of silently starting a
+// brand-new practice that would overwrite the saved progress. When no draft
+// exists, run the quick auto-start (e.g. jump straight into a library).
+function enterPracticeOrResume(autoStart) {
+  const draft = loadPracticeDraft();
+  if (draft) {
+    go('practicePage'); // refreshPage -> renderPracticeSetup -> renderResumeBanner
+    return;
+  }
+  go('practicePage');
+  if (typeof autoStart === 'function') setTimeout(autoStart, 100);
 }
 
 function renderPracticeSetup(mode) {
