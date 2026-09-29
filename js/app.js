@@ -1064,8 +1064,30 @@ function renderQuestion() {
   if (prev !== null) {
     const arr = Array.isArray(prev) ? prev : [prev];
     arr.forEach(i => optsEl.children[i].classList.add('selected'));
+    addOptionMarks(optsEl.children, q, prev, checkAnswer(q, prev));
     $('submitAnswer').disabled = false;
   }
+}
+
+// Big ✓ / ✕ marks on options after grading (like teacher's red pen)
+function addOptionMarks(items, q, selected, isCorrect) {
+  const correctIdxs = q.type === 'judge'
+    ? (q.answer === true ? [0] : [1])
+    : (Array.isArray(q.answer) ? q.answer : [q.answer]);
+  const putMark = (i, cls, ch) => {
+    const el = items[i];
+    if (!el) return;
+    el.classList.add('marked');
+    if (el.querySelector('.opt-mark')) return;
+    const m = document.createElement('div');
+    m.className = 'opt-mark ' + cls;
+    m.textContent = ch;
+    el.appendChild(m);
+  };
+  if (!isCorrect) {
+    (Array.isArray(selected) ? selected : [selected]).forEach(i => putMark(i, 'mark-x', '✕'));
+  }
+  correctIdxs.forEach(i => putMark(i, 'mark-check', '✓'));
 }
 
 function onSelect(idx, type) {
@@ -1107,6 +1129,7 @@ $('submitAnswer').addEventListener('click', () => {
     (Array.isArray(selected) ? selected : [selected]).forEach(i => items[i].classList.add('wrong'));
     correctIdxs.forEach(i => items[i].classList.add('correct'));
   }
+  addOptionMarks(items, q, selected, correct);
 
   if (q.explanation) {
     $('explanationContent').textContent = q.explanation;

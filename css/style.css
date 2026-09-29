@@ -943,6 +943,7 @@ body {
 }
 
 .opt-item {
+  position: relative;
   padding: 12px 14px;
   background: var(--bg);
   border: 2px solid var(--border);
@@ -955,6 +956,23 @@ body {
   font-size: 15px;
   line-height: 1.5;
 }
+
+/* Big hand-pen style ✓ / ✕ marks after grading */
+.opt-mark {
+  position: absolute;
+  left: -10px;
+  top: 50%;
+  transform: translateY(-50%) rotate(-4deg);
+  font-size: 30px;
+  font-weight: 900;
+  line-height: 1;
+  pointer-events: none;
+  z-index: 2;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.12);
+}
+.opt-mark.mark-x { color: #E5484D; }
+.opt-mark.mark-check { color: #3FBF5A; transform: translateY(-50%) rotate(-8deg); }
+.opt-item.marked { padding-left: 26px; }
 
 .opt-item:active { transform: scale(0.99); }
 .opt-item.selected {
