@@ -831,6 +831,60 @@ body {
   gap: 10px;
 }
 
+/* Question-count selector */
+.setup-count-row {
+  margin: 6px 2px 14px;
+}
+.setup-count-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  opacity: 0.7;
+  margin-bottom: 8px;
+}
+.count-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.count-chip {
+  min-width: 48px;
+  text-align: center;
+  padding: 9px 14px;
+  border-radius: 999px;
+  background: var(--card-bg);
+  border: 2px solid var(--border);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.15s;
+  user-select: none;
+}
+.count-chip:active { transform: scale(0.96); }
+.count-chip.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+/* Resume banner */
+.practice-resume-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(91,108,255,0.08);
+  border: 2px solid var(--primary);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin: 4px 2px 16px;
+}
+.prb-icon { font-size: 26px; flex-shrink: 0; }
+.prb-text { flex: 1; min-width: 0; }
+.prb-title { font-size: 15px; font-weight: 700; color: var(--text); }
+.prb-desc { font-size: 13px; color: var(--text); opacity: 0.75; margin-top: 2px; }
+.prb-btn { white-space: nowrap; flex-shrink: 0; }
+
 .pl-card {
   background: var(--card-bg);
   border-radius: var(--radius);

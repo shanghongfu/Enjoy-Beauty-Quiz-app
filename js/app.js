@@ -417,6 +417,44 @@ let session = {
 };
 let pageStack = [];
 
+// Practice question-count preference (persisted). 0 = All.
+let practiceQuestionCount = (() => {
+  const v = parseInt(localStorage.getItem('quiz_qcount') || '20', 10);
+  return isNaN(v) ? 20 : v;
+})();
+const PRACTICE_DRAFT_KEY = 'quiz_practice_draft';
+
+// Save an in-progress (non-exam) session so the user can resume after exiting.
+function savePracticeDraft() {
+  if (!session || !session.active || session.mode === 'exam') return;
+  if (!session.questions || session.questions.length === 0) return;
+  const draft = {
+    mode: session.mode,
+    libraryId: session.libraryId,
+    ids: session.questions.map(q => q.id),
+    index: session.index,
+    answers: session.answers,
+    correctCount: session.correctCount,
+    startTime: session.startTime
+  };
+  try { localStorage.setItem(PRACTICE_DRAFT_KEY, JSON.stringify(draft)); } catch (_) {}
+}
+
+function clearPracticeDraft() {
+  try { localStorage.removeItem(PRACTICE_DRAFT_KEY); } catch (_) {}
+}
+
+function loadPracticeDraft() {
+  try {
+    const raw = localStorage.getItem(PRACTICE_DRAFT_KEY);
+    if (!raw) return null;
+    const d = JSON.parse(raw);
+    if (!d || !Array.isArray(d.ids) || d.ids.length === 0) return null;
+    if (typeof d.index !== 'number' || d.index >= d.ids.length) return null; // finished/none
+    return d;
+  } catch (_) { return null; }
+}
+
 /* ============ Helpers ============ */
 const $ = (id) => document.getElementById(id);
 const $$ = (sel) => document.querySelectorAll(sel);
@@ -552,6 +590,7 @@ async function go(pageId, options = {}) {
 async function back() {
   if (session.active) {
     if (!confirm('Quit current practice session?')) return;
+    savePracticeDraft();
     session.active = false;
   }
   // If we only have one item on stack, fall back to homePage
@@ -580,6 +619,7 @@ $$('.tab').forEach(t => {
   t.addEventListener('click', () => {
     if (session.active && t.dataset.tab !== 'practicePage') {
       if (!confirm('Quit current practice session?')) return;
+      savePracticeDraft();
       session.active = false;
     }
     pageStack = [t.dataset.tab];
@@ -848,6 +888,14 @@ function renderPracticeSetup(mode) {
   $('practiceResultView').classList.add('hidden');
   $('practicePageTitle').textContent = mode ? `${capitalize(mode)} Practice` : 'Practice';
 
+  // Render question-count chips (hidden in exam mode — exam uses fixed per-library count)
+  const countRow = $('practiceCountRow');
+  if (countRow) countRow.classList.toggle('hidden', pendingMode === 'exam');
+  renderCountChips();
+
+  // Resume banner: show if there's an unfinished session
+  renderResumeBanner();
+
   const list = $('practiceLibraryList');
   const visLibs = getVisibleLibraries();
   if (!visLibs.length) {
@@ -874,6 +922,86 @@ function renderPracticeSetup(mode) {
   list.querySelectorAll('.pl-card').forEach(c => {
     c.addEventListener('click', () => startPractice(pendingMode, c.dataset.lib));
   });
+}
+
+function renderCountChips() {
+  const wrap = $('countChips');
+  if (!wrap) return;
+  wrap.querySelectorAll('.count-chip').forEach(chip => {
+    const c = parseInt(chip.dataset.count, 10);
+    chip.classList.toggle('active', c === practiceQuestionCount);
+    chip.onclick = () => {
+      practiceQuestionCount = c;
+      try { localStorage.setItem('quiz_qcount', String(c)); } catch (_) {}
+      wrap.querySelectorAll('.count-chip').forEach(x => x.classList.remove('active'));
+      chip.classList.add('active');
+    };
+  });
+}
+
+function renderResumeBanner() {
+  const box = $('practiceResumeBox');
+  if (!box) return;
+  const draft = loadPracticeDraft();
+  if (!draft) { box.classList.add('hidden'); box.innerHTML = ''; return; }
+  const answered = draft.answers.filter(a => a !== null).length;
+  const total = draft.ids.length;
+  const modeLabel = capitalize(draft.mode);
+  box.innerHTML = `
+    <div class="prb-icon">↩️</div>
+    <div class="prb-text">
+      <div class="prb-title">${i18n.t('practice.resume.title')} · ${modeLabel}</div>
+      <div class="prb-desc">${i18n.t('practice.resume.desc').replace('{a}', answered).replace('{b}', total)}</div>
+    </div>
+    <button class="btn btn-primary prb-btn" id="resumePracticeBtn">${i18n.t('practice.resume.continue')}</button>
+  `;
+  box.classList.remove('hidden');
+  const btn = $('resumePracticeBtn');
+  if (btn) btn.onclick = () => resumePractice(draft);
+}
+
+async function resumePractice(draft) {
+  // Load the exact same question set (by id, in saved order) and continue.
+  let pool;
+  if (draft.libraryId) {
+    pool = await loadLiveQuestionsForLibrary(draft.libraryId);
+  } else {
+    try { const { data: qs } = await db.from('questions').select('*'); pool = qs || []; }
+    catch (_) { pool = []; }
+  }
+  const byId = {};
+  pool.forEach(q => { byId[q.id] = q; });
+  const questions = draft.ids
+    .map(id => byId[id])
+    .filter(Boolean)
+    .map(q => {
+      const options = q.options || [];
+      const isJudge = options.length === 0;
+      let answer = q.correct_index;
+      let type = isJudge ? 'judge' : 'single';
+      if (isJudge) answer = q.correct_index === 0;
+      return { id: q.id, libraryId: q.library_id, stem: q.text, options, answer, explanation: q.explanation || '', type, language: q.language || 'en' };
+    });
+  if (questions.length === 0) { clearPracticeDraft(); renderResumeBanner(); return; }
+
+  session = {
+    active: true,
+    mode: draft.mode,
+    libraryId: draft.libraryId,
+    questions,
+    index: Math.min(draft.index, questions.length - 1),
+    answers: draft.answers.slice(0, questions.length),
+    correctCount: draft.correctCount || 0,
+    startTime: draft.startTime || Date.now(),
+    examDuration: 0, examPassRate: 70, examEndTime: 0
+  };
+  // Pad answers if set grew
+  while (session.answers.length < questions.length) session.answers.push(null);
+
+  $('practiceSetupView').classList.add('hidden');
+  $('practiceAreaView').classList.remove('hidden');
+  $('practiceResultView').classList.add('hidden');
+  renderQuestion();
 }
 
 function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
@@ -934,7 +1062,10 @@ async function startPractice(mode, libraryId) {
 
   let questions;
   if (mode === 'random') {
-    questions = shuffle(pool).slice(0, Math.min(20, pool.length));
+    const sh = shuffle(pool);
+    questions = practiceQuestionCount > 0
+      ? sh.slice(0, Math.min(practiceQuestionCount, sh.length))
+      : sh;
   } else if (mode === 'exam') {
     // Exam mode: respect per-library examQuestionCount (default 50) and examPassRate (default 70)
     const lib = data.libraries.find(l => l.id === libraryId);
@@ -943,9 +1074,15 @@ async function startPractice(mode, libraryId) {
       : Math.min(50, pool.length);
     questions = shuffle(pool).slice(0, examCount);
   } else if (mode === 'wrong') {
-    questions = shuffle(pool);
+    const sh = shuffle(pool);
+    questions = practiceQuestionCount > 0
+      ? sh.slice(0, Math.min(practiceQuestionCount, sh.length))
+      : sh;
   } else {
-    questions = pool.slice();
+    // sequential: in library order, capped by chosen count
+    questions = practiceQuestionCount > 0
+      ? pool.slice(0, Math.min(practiceQuestionCount, pool.length))
+      : pool.slice();
   }
 
   // Exam duration: only in exam mode, only when a library has examDuration set
@@ -977,6 +1114,7 @@ async function startPractice(mode, libraryId) {
   $('practiceAreaView').classList.remove('hidden');
   $('practiceResultView').classList.add('hidden');
   renderQuestion();
+  savePracticeDraft();
 }
 
 /* ============ EXAM TIMER ============ */
@@ -1130,6 +1268,7 @@ $('submitAnswer').addEventListener('click', () => {
     correctIdxs.forEach(i => items[i].classList.add('correct'));
   }
   addOptionMarks(items, q, selected, correct);
+  savePracticeDraft();
 
   if (q.explanation) {
     $('explanationContent').textContent = q.explanation;
@@ -1170,6 +1309,7 @@ $('nextQuestion').addEventListener('click', () => {
   if (session.index < session.questions.length - 1) {
     session.index++;
     renderQuestion();
+    savePracticeDraft();
   } else {
     finishPractice();
   }
@@ -1177,6 +1317,7 @@ $('nextQuestion').addEventListener('click', () => {
 
 function finishPractice() {
   session.active = false;
+  clearPracticeDraft();
   stopExamTimer();
   updateStreak();
 
