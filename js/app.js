@@ -1189,12 +1189,25 @@ function renderQuestion() {
 
     const prev = session.answers[session.index];
     if (prev !== null) {
+      // Already-answered question restored from a saved draft. Render it in the
+      // graded / review state and show "Next" — do NOT re-enable Submit.
+      // Re-submitting a graded question would double-count stats and feel
+      // "stuck" (nothing visibly changes, the click seems to do nothing).
       const arr = Array.isArray(prev) ? prev : [prev];
       // Guard against out-of-range saved answers (e.g. question edited after the
       // draft was saved) so we never throw and freeze the screen.
       arr.forEach(i => { if (optsEl.children[i]) optsEl.children[i].classList.add('selected'); });
       addOptionMarks(optsEl.children, q, prev, checkAnswer(q, prev));
-      $('submitAnswer').disabled = false;
+      if (q.explanation) {
+        $('explanationContent').textContent = q.explanation;
+        $('explanation').classList.remove('hidden');
+      }
+      // Lock the options (already graded) and show the Next button instead of Submit.
+      for (const el of optsEl.children) el.style.pointerEvents = 'none';
+      $('submitAnswer').classList.add('hidden');
+      $('nextQuestion').classList.remove('hidden');
+      $('nextQuestion').textContent = session.index === session.questions.length - 1
+        ? 'Finish ✓' : 'Next →';
     }
   } catch (e) {
     console.error('renderQuestion failed', e);
@@ -1236,55 +1249,60 @@ function onSelect(idx, type) {
 
 $('submitAnswer').addEventListener('click', () => {
   const q = session.questions[session.index];
-  const items = $('optionsList').children;
-  let selected;
-  if (q.type === 'multiple') {
-    selected = Array.from(items).filter(el => el.classList.contains('selected'))
-      .map((el, i) => Array.from(items).indexOf(el));
-  } else {
-    const sel = Array.from(items).findIndex(el => el.classList.contains('selected'));
-    if (sel < 0) return;
-    selected = sel;
+  let items, selected, correct, correctIdxs;
+  try {
+    items = $('optionsList').children;
+    if (q.type === 'multiple') {
+      selected = Array.from(items).filter(el => el.classList.contains('selected'))
+        .map((el, i) => Array.from(items).indexOf(el));
+    } else {
+      const sel = Array.from(items).findIndex(el => el.classList.contains('selected'));
+      if (sel < 0) return;
+      selected = sel;
+    }
+
+    session.answers[session.index] = selected;
+    correct = checkAnswer(q, selected);
+    correctIdxs = q.type === 'judge'
+      ? (q.answer === true ? [0] : [1])
+      : (Array.isArray(q.answer) ? q.answer : [q.answer]);
+
+    if (correct) {
+      (Array.isArray(selected) ? selected : [selected]).forEach(i => items[i].classList.add('correct'));
+      session.correctCount++;
+    } else {
+      (Array.isArray(selected) ? selected : [selected]).forEach(i => items[i].classList.add('wrong'));
+      correctIdxs.forEach(i => items[i].classList.add('correct'));
+    }
+    addOptionMarks(items, q, selected, correct);
+    savePracticeDraft();
+
+    if (q.explanation) {
+      $('explanationContent').textContent = q.explanation;
+      $('explanation').classList.remove('hidden');
+    }
+
+    stats.totalAnswered++;
+    if (correct) stats.totalCorrect++;
+    const lib = q.libraryId;
+    if (!stats.byLibrary[lib]) stats.byLibrary[lib] = { answered: 0, correct: 0 };
+    stats.byLibrary[lib].answered++;
+    if (correct) stats.byLibrary[lib].correct++;
+    if (!correct && !stats.wrongIds.includes(q.id)) stats.wrongIds.push(q.id);
+    if (correct) stats.wrongIds = stats.wrongIds.filter(id => id !== q.id);
+
+    DB.saveStats(stats);
+  } catch (e) {
+    console.error('submitAnswer failed', e);
+  } finally {
+    // Always reveal the Next button and lock options so the screen can never
+    // freeze with a stale/disabled Submit (the "click does nothing" symptom).
+    if (items) for (let el of items) el.style.pointerEvents = 'none';
+    $('submitAnswer').classList.add('hidden');
+    $('nextQuestion').classList.remove('hidden');
+    $('nextQuestion').textContent = session.index === session.questions.length - 1
+      ? 'Finish ✓' : 'Next →';
   }
-
-  session.answers[session.index] = selected;
-  const correct = checkAnswer(q, selected);
-  const correctIdxs = q.type === 'judge'
-    ? (q.answer === true ? [0] : [1])
-    : (Array.isArray(q.answer) ? q.answer : [q.answer]);
-
-  for (let el of items) el.style.pointerEvents = 'none';
-
-  if (correct) {
-    (Array.isArray(selected) ? selected : [selected]).forEach(i => items[i].classList.add('correct'));
-    session.correctCount++;
-  } else {
-    (Array.isArray(selected) ? selected : [selected]).forEach(i => items[i].classList.add('wrong'));
-    correctIdxs.forEach(i => items[i].classList.add('correct'));
-  }
-  addOptionMarks(items, q, selected, correct);
-  savePracticeDraft();
-
-  if (q.explanation) {
-    $('explanationContent').textContent = q.explanation;
-    $('explanation').classList.remove('hidden');
-  }
-
-  stats.totalAnswered++;
-  if (correct) stats.totalCorrect++;
-  const lib = q.libraryId;
-  if (!stats.byLibrary[lib]) stats.byLibrary[lib] = { answered: 0, correct: 0 };
-  stats.byLibrary[lib].answered++;
-  if (correct) stats.byLibrary[lib].correct++;
-  if (!correct && !stats.wrongIds.includes(q.id)) stats.wrongIds.push(q.id);
-  if (correct) stats.wrongIds = stats.wrongIds.filter(id => id !== q.id);
-
-  DB.saveStats(stats);
-
-  $('submitAnswer').classList.add('hidden');
-  $('nextQuestion').classList.remove('hidden');
-  $('nextQuestion').textContent = session.index === session.questions.length - 1
-    ? 'Finish ✓' : 'Next →';
 });
 
 function checkAnswer(q, sel) {
