@@ -718,6 +718,8 @@ function renderHome() {
       });
     });
   }
+  // Keep the home-page question-count chips in sync with the global preference
+  renderCountChips();
 }
 
 // Daily challenge
@@ -925,17 +927,19 @@ function renderPracticeSetup(mode) {
 }
 
 function renderCountChips() {
-  const wrap = $('countChips');
-  if (!wrap) return;
-  wrap.querySelectorAll('.count-chip').forEach(chip => {
-    const c = parseInt(chip.dataset.count, 10);
-    chip.classList.toggle('active', c === practiceQuestionCount);
-    chip.onclick = () => {
-      practiceQuestionCount = c;
-      try { localStorage.setItem('quiz_qcount', String(c)); } catch (_) {}
-      wrap.querySelectorAll('.count-chip').forEach(x => x.classList.remove('active'));
-      chip.classList.add('active');
-    };
+  // Refresh every .count-chips group on the page (home + practice setup) so the
+  // chosen question-count stays in sync everywhere it's shown.
+  const groups = Array.from(document.querySelectorAll('.count-chips'));
+  groups.forEach(wrap => {
+    wrap.querySelectorAll('.count-chip').forEach(chip => {
+      const c = parseInt(chip.dataset.count, 10);
+      chip.classList.toggle('active', c === practiceQuestionCount);
+      chip.onclick = () => {
+        practiceQuestionCount = c;
+        try { localStorage.setItem('quiz_qcount', String(c)); } catch (_) {}
+        renderCountChips(); // update all groups (home + setup)
+      };
+    });
   });
 }
 
@@ -953,11 +957,16 @@ function renderResumeBanner() {
       <div class="prb-title">${i18n.t('practice.resume.title')} · ${modeLabel}</div>
       <div class="prb-desc">${i18n.t('practice.resume.desc').replace('{a}', answered).replace('{b}', total)}</div>
     </div>
-    <button class="btn btn-primary prb-btn" id="resumePracticeBtn">${i18n.t('practice.resume.continue')}</button>
+    <div class="prb-actions">
+      <button class="btn prb-discard" id="discardPracticeBtn">${i18n.t('practice.resume.discard')}</button>
+      <button class="btn btn-primary prb-btn" id="resumePracticeBtn">${i18n.t('practice.resume.continue')}</button>
+    </div>
   `;
   box.classList.remove('hidden');
   const btn = $('resumePracticeBtn');
   if (btn) btn.onclick = () => resumePractice(draft);
+  const disc = $('discardPracticeBtn');
+  if (disc) disc.onclick = () => { clearPracticeDraft(); renderResumeBanner(); };
 }
 
 async function resumePractice(draft) {
