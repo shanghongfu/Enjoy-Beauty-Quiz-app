@@ -417,11 +417,6 @@ let session = {
 };
 let pageStack = [];
 
-// Practice question-count preference (persisted). 0 = All.
-let practiceQuestionCount = (() => {
-  const v = parseInt(localStorage.getItem('quiz_qcount') || '20', 10);
-  return isNaN(v) ? 20 : v;
-})();
 const PRACTICE_DRAFT_KEY = 'quiz_practice_draft';
 
 // Save an in-progress (non-exam) session so the user can resume after exiting.
@@ -718,8 +713,6 @@ function renderHome() {
       });
     });
   }
-  // Keep the home-page question-count chips in sync with the global preference
-  renderCountChips();
 }
 
 // Daily challenge
@@ -890,11 +883,6 @@ function renderPracticeSetup(mode) {
   $('practiceResultView').classList.add('hidden');
   $('practicePageTitle').textContent = mode ? `${capitalize(mode)} Practice` : 'Practice';
 
-  // Render question-count chips (hidden in exam mode — exam uses fixed per-library count)
-  const countRow = $('practiceCountRow');
-  if (countRow) countRow.classList.toggle('hidden', pendingMode === 'exam');
-  renderCountChips();
-
   // Resume banner: show if there's an unfinished session
   renderResumeBanner();
 
@@ -923,23 +911,6 @@ function renderPracticeSetup(mode) {
   });
   list.querySelectorAll('.pl-card').forEach(c => {
     c.addEventListener('click', () => startPractice(pendingMode, c.dataset.lib));
-  });
-}
-
-function renderCountChips() {
-  // Refresh every .count-chips group on the page (home + practice setup) so the
-  // chosen question-count stays in sync everywhere it's shown.
-  const groups = Array.from(document.querySelectorAll('.count-chips'));
-  groups.forEach(wrap => {
-    wrap.querySelectorAll('.count-chip').forEach(chip => {
-      const c = parseInt(chip.dataset.count, 10);
-      chip.classList.toggle('active', c === practiceQuestionCount);
-      chip.onclick = () => {
-        practiceQuestionCount = c;
-        try { localStorage.setItem('quiz_qcount', String(c)); } catch (_) {}
-        renderCountChips(); // update all groups (home + setup)
-      };
-    });
   });
 }
 
@@ -1070,12 +1041,7 @@ async function startPractice(mode, libraryId) {
   }
 
   let questions;
-  if (mode === 'random') {
-    const sh = shuffle(pool);
-    questions = practiceQuestionCount > 0
-      ? sh.slice(0, Math.min(practiceQuestionCount, sh.length))
-      : sh;
-  } else if (mode === 'exam') {
+  if (mode === 'exam') {
     // Exam mode: respect per-library examQuestionCount (default 50) and examPassRate (default 70)
     const lib = data.libraries.find(l => l.id === libraryId);
     const examCount = (lib && lib.examQuestionCount && lib.examQuestionCount > 0)
@@ -1083,15 +1049,12 @@ async function startPractice(mode, libraryId) {
       : Math.min(50, pool.length);
     questions = shuffle(pool).slice(0, examCount);
   } else if (mode === 'wrong') {
-    const sh = shuffle(pool);
-    questions = practiceQuestionCount > 0
-      ? sh.slice(0, Math.min(practiceQuestionCount, sh.length))
-      : sh;
+    questions = shuffle(pool);
+  } else if (mode === 'random') {
+    questions = shuffle(pool);
   } else {
-    // sequential: in library order, capped by chosen count
-    questions = practiceQuestionCount > 0
-      ? pool.slice(0, Math.min(practiceQuestionCount, pool.length))
-      : pool.slice();
+    // sequential: full library in order
+    questions = pool.slice();
   }
 
   // Exam duration: only in exam mode, only when a library has examDuration set
