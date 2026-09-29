@@ -826,8 +826,8 @@
   <!-- Register SW BEFORE any other scripts — no app.js dependency -->
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js?v=46&t=' + Date.now(), { scope: './' }).then(function(reg) {
-        console.log('[SW] Registered v46:', reg.scope);
+      navigator.serviceWorker.register('sw.js?v=48&t=' + Date.now(), { scope: './' }).then(function(reg) {
+        console.log('[SW] Registered v48:', reg.scope);
       }).catch(function(err) {
         console.warn('[SW] Registration failed:', err);
       });
