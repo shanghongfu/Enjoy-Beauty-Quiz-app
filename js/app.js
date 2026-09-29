@@ -963,6 +963,11 @@ async function resumePractice(draft) {
     .map(id => byId[id])
     .filter(Boolean)
     .map(q => {
+      // loadLiveQuestionsForLibrary already returns normalized objects
+      // (answer/stem/libraryId). Re-mapping them as raw DB rows would read
+      // q.correct_index/q.text off a normalized object -> undefined answers,
+      // which broke grading after resume ("can't tell right from wrong").
+      if (q.answer !== undefined || q.stem !== undefined) return q;
       const options = q.options || [];
       const isJudge = options.length === 0;
       let answer = q.correct_index;
@@ -1189,10 +1194,11 @@ function renderQuestion() {
 
     const prev = session.answers[session.index];
     if (prev !== null) {
-      // Already-answered question restored from a saved draft. Render it in the
-      // graded / review state and show "Next" — do NOT re-enable Submit.
-      // Re-submitting a graded question would double-count stats and feel
-      // "stuck" (nothing visibly changes, the click seems to do nothing).
+      // Already-answered question restored from a saved draft. Keep it
+      // re-answerable: show the prior selection + grading as a review, but leave
+      // the options clickable and Submit enabled so the user can change their
+      // answer and re-grade (instead of being locked out, which felt like
+      // "can't select / can't tell right from wrong").
       const arr = Array.isArray(prev) ? prev : [prev];
       // Guard against out-of-range saved answers (e.g. question edited after the
       // draft was saved) so we never throw and freeze the screen.
@@ -1202,12 +1208,9 @@ function renderQuestion() {
         $('explanationContent').textContent = q.explanation;
         $('explanation').classList.remove('hidden');
       }
-      // Lock the options (already graded) and show the Next button instead of Submit.
-      for (const el of optsEl.children) el.style.pointerEvents = 'none';
-      $('submitAnswer').classList.add('hidden');
-      $('nextQuestion').classList.remove('hidden');
-      $('nextQuestion').textContent = session.index === session.questions.length - 1
-        ? 'Finish ✓' : 'Next →';
+      // Re-answerable: options stay interactive, Submit is enabled; Next stays
+      // hidden until they (re-)submit.
+      $('submitAnswer').disabled = false;
     }
   } catch (e) {
     console.error('renderQuestion failed', e);
@@ -1238,6 +1241,14 @@ function addOptionMarks(items, q, selected, isCorrect) {
 
 function onSelect(idx, type) {
   const items = $('optionsList').children;
+  // Clear any previous grading visuals so re-answering a resumed (already
+  // answered) question starts from a clean state.
+  for (const el of items) {
+    el.classList.remove('marked', 'correct', 'wrong');
+    const mk = el.querySelector('.opt-mark');
+    if (mk) mk.remove();
+  }
+  $('explanation').classList.add('hidden');
   if (type === 'multiple') {
     items[idx].classList.toggle('selected');
   } else {
@@ -1259,6 +1270,26 @@ $('submitAnswer').addEventListener('click', () => {
       const sel = Array.from(items).findIndex(el => el.classList.contains('selected'));
       if (sel < 0) return;
       selected = sel;
+    }
+
+    // If this question was already answered (e.g. resumed from a draft and the
+    // user is re-answering), undo its previous stat contribution first so we
+    // never double-count attempts.
+    const prevAnswer = session.answers[session.index];
+    const prevCorrect = (prevAnswer !== null && prevAnswer !== undefined)
+      ? checkAnswer(q, prevAnswer) : null;
+    const lib = q.libraryId;
+    if (prevCorrect !== null) {
+      stats.totalAnswered--;
+      if (!stats.byLibrary[lib]) stats.byLibrary[lib] = { answered: 0, correct: 0 };
+      stats.byLibrary[lib].answered--;
+      if (prevCorrect) {
+        stats.totalCorrect--;
+        stats.byLibrary[lib].correct--;
+        session.correctCount--;
+      } else {
+        stats.wrongIds = stats.wrongIds.filter(id => id !== q.id);
+      }
     }
 
     session.answers[session.index] = selected;
@@ -1284,7 +1315,6 @@ $('submitAnswer').addEventListener('click', () => {
 
     stats.totalAnswered++;
     if (correct) stats.totalCorrect++;
-    const lib = q.libraryId;
     if (!stats.byLibrary[lib]) stats.byLibrary[lib] = { answered: 0, correct: 0 };
     stats.byLibrary[lib].answered++;
     if (correct) stats.byLibrary[lib].correct++;
